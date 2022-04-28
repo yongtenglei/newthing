@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/google/uuid"
+	"github.com/yongtenglei/newThing/pkg/util"
 
 	"github.com/yongtenglei/newThing/dao/mysql"
 	"github.com/yongtenglei/newThing/proto/pb"
@@ -28,9 +29,11 @@ func main() {
 
 	mysql.Init()
 
+	port := util.RandomPort("localhost")
+
 	addr := fmt.Sprintf("%s:%d",
 		settings.UserServiceConf.UserWebServerConf.Host,
-		settings.UserServiceConf.UserWebServerConf.Port)
+		port)
 
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
@@ -51,7 +54,7 @@ func main() {
 		settings.UserServiceConf.UserWebServerConf.Name,
 		id,
 		settings.UserServiceConf.UserWebServerConf.Host,
-		settings.UserServiceConf.UserWebServerConf.Port,
+		port,
 		settings.UserServiceConf.UserWebServerConf.Tags)
 	if err != nil {
 		zap.S().Errorw("Web Server register to Consul failed", "err", err.Error())

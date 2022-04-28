@@ -74,6 +74,7 @@ func (us UserServiceServer) Info(ctx context.Context, req *pb.InfoReq) (*pb.Info
 	res.Gender = int32(user.Gender)
 	res.Mail = user.Mail
 	res.Mobile = user.Mobile
+
 	return &res, nil
 }
 
