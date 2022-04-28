@@ -1,0 +1,90 @@
+syntax = "proto3";
+
+//import "google/protobuf/empty.proto";
+// 文件生成在那个包下
+package pb;
+//  proto文件的别名
+option go_package = "./pb";
+
+service UserService{
+
+  rpc Register(RegisterReq) returns (RegisterRes);
+
+  rpc Login(LoginReq) returns (LoginRes);
+
+  rpc Info(InfoReq) returns (InfoRes);
+
+  rpc Delete(DeleteReq) returns (DeleteRes);
+
+  rpc Update(UpdateReq) returns (UpdateRes);
+
+  rpc RePassword(RePasswordReq) returns (RePasswordRes);
+
+}
+
+message RegisterReq {
+  string mobile = 1;
+  string password = 2;
+  string name = 3;
+  int32 gender = 4;
+  string mail = 5;
+}
+
+message RegisterRes {
+  string mobile = 1;
+  string password = 2;
+  string name = 3;
+  int32 gender = 4;
+  string mail = 5;
+}
+
+message LoginReq {
+  string mobile = 1;
+  string password = 2;
+
+}
+
+message LoginRes {
+  int32 ok = 1;
+}
+
+message InfoReq {
+  string mobile = 1;
+}
+
+message InfoRes {
+  string mobile = 1;
+  string name = 2;
+  int32 gender = 3;
+  string mail = 4;
+}
+
+message DeleteReq{
+  string mobile = 1;
+}
+
+message DeleteRes {
+  int32 ok = 1;
+}
+
+message UpdateReq {
+  string mobile = 1;
+  string name = 2;
+  int32 gender = 3;
+  string mail = 4;
+}
+
+message UpdateRes {
+  int32 ok = 1;
+}
+
+message RePasswordReq {
+  string mobile = 1;
+  string password = 2;
+}
+
+message RePasswordRes {
+  int32 ok = 1;
+}
+
+

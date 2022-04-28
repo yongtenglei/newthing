@@ -1,0 +1,8 @@
+ipAddr: '192.168.1.12'
+port: 8848
+namespaceId: 'e9672fd9-3086-4103-b2a9-155cb99b3f48'
+dataId: 'user_service_config'
+group: 'user_service'
+logDir: '/tmp/nacos/log'
+cacheDir: '/tmp/nacos/cache'
+logLevel: 'debug'
