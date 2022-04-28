@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	_ "github.com/mbobakov/grpc-consul-resolver" // It's important
 	"github.com/yongtenglei/newThing/pkg/e"
 	"github.com/yongtenglei/newThing/proto/pb"
 	"github.com/yongtenglei/newThing/settings"
@@ -15,15 +16,30 @@ import (
 var UserServiceClient pb.UserServiceClient
 
 func InitClient() {
-	addr := fmt.Sprintf("%s:%d",
-		settings.UserServiceConf.UserWebServerConf.Host,
-		settings.UserServiceConf.UserWebServerConf.Port)
+	//addr := fmt.Sprintf("%s:%d",
+	//	settings.UserServiceConf.UserWebServerConf.Host,
+	//	settings.UserServiceConf.UserWebServerConf.Port)
+	//
+	//conn, err := grpc.Dial(addr, grpc.WithInsecure())
+	//if err != nil {
+	//	zap.S().Errorw("grpc Dial failed", "err", err.Error())
+	//}
+	//UserServiceClient = pb.NewUserServiceClient(conn)
 
-	conn, err := grpc.Dial(addr, grpc.WithInsecure())
+	addr := fmt.Sprintf("consul://%s:%d/%s?wait=14s",
+		settings.UserServiceConf.ConsulConf.Host,
+		settings.UserServiceConf.ConsulConf.Port,
+		settings.UserServiceConf.UserWebServerConf.Name)
+	//"consul://127.0.0.1:8500/user_web_server?wait=14s"
+	conn, err := grpc.Dial(addr, grpc.WithInsecure(), grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy": "round_robin"}`))
 	if err != nil {
 		zap.S().Errorw("grpc Dial failed", "err", err.Error())
+
+		panic(err)
 	}
+
 	UserServiceClient = pb.NewUserServiceClient(conn)
+
 }
 
 type RegisterReq struct {

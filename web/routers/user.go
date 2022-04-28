@@ -3,10 +3,14 @@ package routers
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/yongtenglei/newThing/web/logic"
+	"net/http"
 )
 
 func SetUp() *gin.Engine {
 	router := gin.Default()
+	router.GET("/health", func(c *gin.Context) {
+		c.String(http.StatusOK, "ok")
+	})
 
 	v1Group := router.Group("/v1/api/user")
 	{
