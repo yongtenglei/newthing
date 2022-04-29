@@ -32,10 +32,9 @@ message RegisterReq {
 
 message RegisterRes {
   string mobile = 1;
-  string password = 2;
-  string name = 3;
-  int32 gender = 4;
-  string mail = 5;
+  string name = 2;
+  int32 gender = 3;
+  string mail = 4;
 }
 
 message LoginReq {
@@ -46,6 +45,7 @@ message LoginReq {
 
 message LoginRes {
   int32 ok = 1;
+  string token = 2;
 }
 
 message InfoReq {
