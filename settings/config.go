@@ -11,6 +11,15 @@ type NacosConfig struct {
 	LogLevel    string `mapstructure:"logLevel"`
 }
 
+type UserServiceConfig struct {
+	UserWebServerConf *UserWebServerConfig `json:"server"`
+	UserWebClientConf *UserWebClientConfig `json:"client"`
+	ConsulConf        *ConsulConfig        `json:"consul"`
+	MySQLConf         *MySQLConfig         `json:"mysql"`
+	JWTConf           *JWTConfig           `json:"jwt"`
+	ScryptConf        *ScryptConfig        `json:"scrypt"`
+}
+
 type UserWebServerConfig struct {
 	Host string   `json:"host,required"`
 	Port int      `json:"port,required"`
@@ -30,17 +39,20 @@ type ConsulConfig struct {
 	Port int    `json:"port,required"`
 }
 
-type UserServiceConfig struct {
-	UserWebServerConf *UserWebServerConfig `json:"server"`
-	UserWebClientConf *UserWebClientConfig `json:"client"`
-	ConsulConf        *ConsulConfig        `json:"consul"`
-	MySQLConf         *MySQLConfig         `json:"mysql"`
-}
-
 type MySQLConfig struct {
 	Host     string `json:"host,required"`
 	Port     int    `json:"port,required"`
 	User     string `json:"user,required"`
 	Password string `json:"password,required"`
 	DbName   string `json:"dbName,required"`
+}
+
+type JWTConfig struct {
+	Issuer     string `json:"issuer,required"`
+	SignKey    string `json:"signKey,required"`
+	ExpireTime int64  `json:"expireTime"`
+}
+
+type ScryptConfig struct {
+	Salt string `json:"salt"`
 }

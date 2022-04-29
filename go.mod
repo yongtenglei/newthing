@@ -3,6 +3,7 @@ module github.com/yongtenglei/newThing
 go 1.18
 
 require (
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.7.7
 	github.com/google/uuid v1.1.2
 	github.com/hashicorp/consul/api v1.12.0

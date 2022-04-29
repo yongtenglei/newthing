@@ -3,6 +3,7 @@ package routers
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/yongtenglei/newThing/web/logic"
+	"github.com/yongtenglei/newThing/web/middlewares"
 	"net/http"
 )
 
@@ -12,12 +13,14 @@ func SetUp() *gin.Engine {
 		c.String(http.StatusOK, "ok")
 	})
 
-	v1Group := router.Group("/v1/api/user")
+	// register
+	router.POST("/register", logic.RegisterHandler)
+
+	// login
+	router.POST("/login", logic.LoginHandler)
+
+	v1Group := router.Group("/v1/api/user", middlewares.JWTAuth())
 	{
-		// register
-		v1Group.POST("/register", logic.RegisterHandler)
-		// login
-		v1Group.POST("/login", logic.LoginHandler)
 		// info
 		v1Group.GET("/info/:mobile", logic.InfoHandler)
 		// update

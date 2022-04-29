@@ -6,6 +6,8 @@ import (
 	"github.com/yongtenglei/newThing/dao/mysql"
 	"github.com/yongtenglei/newThing/model"
 	"github.com/yongtenglei/newThing/pkg/e"
+	"github.com/yongtenglei/newThing/pkg/jwtx"
+	"github.com/yongtenglei/newThing/pkg/scryptx"
 	"github.com/yongtenglei/newThing/proto/pb"
 	"go.uber.org/zap"
 )
@@ -23,7 +25,7 @@ func (us UserServiceServer) Register(ctx context.Context, req *pb.RegisterReq) (
 
 	user = model.User{
 		Mobile:   req.Mobile,
-		Password: req.Password,
+		Password: scryptx.PasswordEncrypt(req.Password),
 		Name:     req.Name,
 		Gender:   int(req.Gender),
 		Mail:     req.Mail,
@@ -36,10 +38,10 @@ func (us UserServiceServer) Register(ctx context.Context, req *pb.RegisterReq) (
 	}
 
 	var res pb.RegisterRes
+
 	res.Name = req.Name
 	res.Gender = req.Gender
 	res.Mail = req.Mail
-	res.Password = req.Password
 	res.Mobile = req.Mobile
 
 	return &res, nil
@@ -52,12 +54,20 @@ func (us UserServiceServer) Login(ctx context.Context, req *pb.LoginReq) (*pb.Lo
 		return nil, errors.New(e.UserDoesNotFound)
 	}
 
-	if user.Password != req.Password {
+	if !scryptx.PasswordValidate(req.Password, user.Password) {
 		return nil, errors.New(e.PasswordErr)
 	}
 
 	var res pb.LoginRes
 	res.Ok = 1
+
+	token, err := jwtx.CreateUserClaims(req.Mobile)
+	if err != nil {
+		zap.S().Errorw("Register CreateUserClaims failed", "err", err.Error())
+		return nil, errors.New(e.InternalBusy)
+	}
+
+	res.Token = token
 
 	return &res, nil
 }
@@ -140,7 +150,7 @@ func (us UserServiceServer) RePassword(ctx context.Context, req *pb.RePasswordRe
 
 	m := make(map[string]interface{})
 	if req.Password != "" {
-		m["password"] = req.Password
+		m["password"] = scryptx.PasswordEncrypt(req.Password)
 	}
 
 	if err := mysql.DB.Model(&user).Updates(m).Error; err != nil {

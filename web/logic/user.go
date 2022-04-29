@@ -91,7 +91,6 @@ func RegisterHandler(c *gin.Context) {
 	res.Gender = int(r.Gender)
 	res.Mail = r.Mail
 	res.Mobile = r.Mobile
-	res.Password = r.Password
 
 	c.JSON(http.StatusOK, gin.H{
 		"code": e.OK,
@@ -105,7 +104,8 @@ type LoginReq struct {
 }
 
 type LoginRes struct {
-	Ok int `json:"ok"`
+	Ok    int    `json:"ok"`
+	Token string `json:"token"`
 }
 
 func LoginHandler(c *gin.Context) {
@@ -135,6 +135,7 @@ func LoginHandler(c *gin.Context) {
 
 	var res LoginRes
 	res.Ok = int(r.Ok)
+	res.Token = r.Token
 
 	c.JSON(http.StatusOK, gin.H{
 		"code": e.OK,

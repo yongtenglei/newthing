@@ -8,4 +8,7 @@ const (
 	UserDoesNotFound  = "用户不存在"
 	PasswordErr       = "密码错误"
 	InternalBusy      = "内部错误"
+
+	ParseJWTFailed  = "鉴权失败"
+	InvalidTokenErr = "无效TOKEN"
 )
