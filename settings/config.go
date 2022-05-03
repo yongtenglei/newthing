@@ -16,7 +16,7 @@ type UserServiceConfig struct {
 	UserWebClientConf *UserWebClientConfig `json:"client"`
 	ConsulConf        *ConsulConfig        `json:"consul"`
 	MySQLConf         *MySQLConfig         `json:"mysql"`
-	JWTConf           *JWTConfig           `json:"jwt"`
+	TokenConf         *TokenConfig         `json:"token"`
 	ScryptConf        *ScryptConfig        `json:"scrypt"`
 }
 
@@ -47,10 +47,11 @@ type MySQLConfig struct {
 	DbName   string `json:"dbName,required"`
 }
 
-type JWTConfig struct {
-	Issuer     string `json:"issuer,required"`
-	SignKey    string `json:"signKey,required"`
-	ExpireTime int64  `json:"expireTime"`
+type TokenConfig struct {
+	MinSignKeySize int    `json:"minKeySize,required"`
+	Issuer         string `json:"issuer,required"`
+	SignKey        string `json:"signKey,required"`
+	ExpireTime     int64  `json:"expireTime"`
 }
 
 type ScryptConfig struct {

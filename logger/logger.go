@@ -1,4 +1,4 @@
-package main
+package logger
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ var Logger *zap.Logger
 var err error
 var Undo func()
 
-func init() {
+func Init() {
 	Logger, err = newProductionLogger()
 	if err != nil {
 		panic(err)

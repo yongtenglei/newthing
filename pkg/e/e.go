@@ -9,7 +9,6 @@ const (
 	PasswordErr       = "密码错误"
 	InternalBusy      = "内部错误"
 
-	ParseJWTFailed  = "鉴权失败"
 	InvalidTokenErr = "无效TOKEN"
 	ExpiredTokenErr = "过期的Token"
 	TokenMethodErr  = "非HMAC方法"

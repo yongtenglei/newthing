@@ -19,13 +19,13 @@ func CreateUserClaims(mobile string) (string, error) {
 	claims := UserClaims{
 		mobile,
 		jwt.StandardClaims{
-			ExpiresAt: time.Now().Unix() + settings.UserServiceConf.JWTConf.ExpireTime,
-			Issuer:    settings.UserServiceConf.JWTConf.Issuer,
+			ExpiresAt: time.Now().Unix() + settings.UserServiceConf.TokenConf.ExpireTime,
+			Issuer:    settings.UserServiceConf.TokenConf.Issuer,
 		},
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	ss, err := token.SignedString([]byte(settings.UserServiceConf.JWTConf.SignKey))
+	ss, err := token.SignedString([]byte(settings.UserServiceConf.TokenConf.SignKey))
 	if err != nil {
 		zap.S().Errorw("CreateUserClaims SignedString failed", "err", err.Error())
 		return "", err
@@ -40,7 +40,7 @@ func ParseUserClaims(tokenString string) (*UserClaims, error) {
 			zap.S().Error("ParseWithClaims but without SigningMethodHMAC method")
 			return nil, errors.New(e.TokenMethodErr)
 		}
-		return []byte(settings.UserServiceConf.JWTConf.SignKey), nil
+		return []byte(settings.UserServiceConf.TokenConf.SignKey), nil
 	})
 
 	if err != nil {
@@ -50,7 +50,7 @@ func ParseUserClaims(tokenString string) (*UserClaims, error) {
 		// Allow for more detailed error handling.
 
 		//if verr , ok := err.(*jwt.ValidationError); ok && errors.Is(verr.Inner, e.ExpiredTokenErr);
-		
+
 		return nil, errors.New(err.Error())
 		//return nil, errors.New(e.ParseJWTFailed)
 	}
@@ -71,7 +71,7 @@ func RefreshToken(token string) (string, error) {
 	}
 
 	tokenClaims, err := jwt.ParseWithClaims(token, &UserClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(settings.UserServiceConf.JWTConf.SignKey), nil
+		return []byte(settings.UserServiceConf.TokenConf.SignKey), nil
 	})
 
 	if err != nil {
@@ -80,7 +80,7 @@ func RefreshToken(token string) (string, error) {
 
 	if tokenClaims != nil {
 		if claims, ok := tokenClaims.Claims.(*UserClaims); ok && tokenClaims.Valid {
-			claims.StandardClaims.ExpiresAt = time.Now().Add(time.Duration(settings.UserServiceConf.JWTConf.ExpireTime)).Unix()
+			claims.StandardClaims.ExpiresAt = time.Now().Add(time.Duration(settings.UserServiceConf.TokenConf.ExpireTime)).Unix()
 			return CreateUserClaims(claims.Mobile)
 		}
 	}
