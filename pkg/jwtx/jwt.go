@@ -35,11 +35,22 @@ func CreateUserClaims(mobile string) (string, error) {
 
 func ParseUserClaims(tokenString string) (*UserClaims, error) {
 
-	token, err := jwt.ParseWithClaims(tokenString, &UserClaims{}, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &UserClaims{}, func(t *jwt.Token) (interface{}, error) {
+		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+			zap.S().Error("ParseWithClaims but without SigningMethodHMAC method")
+			return nil, errors.New(e.TokenMethodErr)
+		}
 		return []byte(settings.UserServiceConf.JWTConf.SignKey), nil
 	})
 
 	if err != nil {
+		//handle error in more detail
+		// TODO:
+		// It may be necessary to customize the Valid function which throw a custom error if an error occurs.
+		// Allow for more detailed error handling.
+
+		//if verr , ok := err.(*jwt.ValidationError); ok && errors.Is(verr.Inner, e.ExpiredTokenErr);
+		
 		return nil, errors.New(err.Error())
 		//return nil, errors.New(e.ParseJWTFailed)
 	}

@@ -1,4 +1,4 @@
-ipAddr: '192.168.1.12'
+ipAddr: '192.168.1.14'
 port: 8848
 namespaceId: 'e9672fd9-3086-4103-b2a9-155cb99b3f48'
 dataId: 'user_service_config'
