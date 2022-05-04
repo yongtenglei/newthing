@@ -2,6 +2,7 @@ package logger
 
 import (
 	"fmt"
+	"os"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -21,10 +22,25 @@ func Init() {
 	Undo = zap.ReplaceGlobals(Logger)
 }
 
+const logPath = "logs"
+
 func newProductionLogger() (*zap.Logger, error) {
 	productionLoggerConfig := zap.NewProductionConfig()
-	productionLoggerConfig.OutputPaths = append(productionLoggerConfig.OutputPaths, "./tmp/logs")
+	productionLoggerConfig.OutputPaths = append(productionLoggerConfig.OutputPaths, logPath)
 	productionLoggerConfig.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+
+	if _, err := os.Stat(logPath); err != nil {
+		if os.IsNotExist(err) {
+			logfile, iErr := os.Create(logPath)
+			if iErr != nil {
+				panic(err)
+			}
+			iErr = logfile.Close()
+			if iErr != nil {
+				panic(err)
+			}
+		}
+	}
 
 	return productionLoggerConfig.Build()
 

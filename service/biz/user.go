@@ -6,10 +6,12 @@ import (
 	"github.com/yongtenglei/newThing/dao/mysql"
 	"github.com/yongtenglei/newThing/model"
 	"github.com/yongtenglei/newThing/pkg/e"
-	"github.com/yongtenglei/newThing/pkg/jwtx"
 	"github.com/yongtenglei/newThing/pkg/scryptx"
+	"github.com/yongtenglei/newThing/pkg/tokenx"
 	"github.com/yongtenglei/newThing/proto/pb"
+	"github.com/yongtenglei/newThing/settings"
 	"go.uber.org/zap"
+	"time"
 )
 
 type UserServiceServer struct {
@@ -61,7 +63,13 @@ func (us UserServiceServer) Login(ctx context.Context, req *pb.LoginReq) (*pb.Lo
 	var res pb.LoginRes
 	res.Ok = 1
 
-	token, err := jwtx.CreateUserClaims(req.Mobile)
+	// if you want to use paseto instead of jwt, substitute JWTMaker to PasetoMaker instead.
+	jwtMaker, err := tokenx.NewJWTMaker(settings.UserServiceConf.TokenConf.SignKey)
+	if err != nil {
+		zap.S().Errorw("Register NewJWTMaker failed", "err", err.Error())
+		return nil, errors.New(e.InternalBusy)
+	}
+	token, err := jwtMaker.CreateToken(req.Mobile, time.Duration(settings.UserServiceConf.TokenConf.ExpireTime))
 	if err != nil {
 		zap.S().Errorw("Register CreateUserClaims failed", "err", err.Error())
 		return nil, errors.New(e.InternalBusy)

@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/google/uuid"
+	"github.com/yongtenglei/newThing/logger"
 	"github.com/yongtenglei/newThing/pkg/util"
 
 	"github.com/yongtenglei/newThing/dao/mysql"
@@ -22,6 +23,8 @@ import (
 )
 
 func init() {
+	logger.Init()
+
 	configPath := flag.String("f", "setting.yaml", "config file path")
 	settings.ParseConfig(*configPath)
 }
