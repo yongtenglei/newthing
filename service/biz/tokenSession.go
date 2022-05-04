@@ -7,9 +7,12 @@ import (
 	"github.com/yongtenglei/newThing/dao/mysql"
 	"github.com/yongtenglei/newThing/model"
 	"github.com/yongtenglei/newThing/pkg/e"
+	"github.com/yongtenglei/newThing/pkg/tokenx"
 	"github.com/yongtenglei/newThing/proto/pb"
+	"github.com/yongtenglei/newThing/settings"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
+	"time"
 )
 
 type TokenSessionServiceServer struct {
@@ -64,6 +67,42 @@ func (t TokenSessionServiceServer) GetTokenSession(ctx context.Context, req *pb.
 		ClientIP:     ts.ClientIP,
 		IssuedAt:     ts.IssuedAt.Unix(),
 		ExpiredAt:    ts.ExpiredAt,
+	}
+
+	return &res, nil
+}
+
+func (t TokenSessionServiceServer) RefreshToken(ctx context.Context, req *pb.RefreshReq) (*pb.RefreshRes, error) {
+	jwtMaker, err := tokenx.NewJWTMaker(settings.UserServiceConf.TokenConf.SignKey)
+	if err != nil {
+		zap.S().Errorw("RefreshToken NewJWTMaker failed", "err", err.Error())
+		return nil, errors.New(e.InternalBusy)
+	}
+	_, err = jwtMaker.ParseToken(req.RefreshToken)
+	if err != nil {
+		return nil, err
+		//return nil, errors.New(e.InvalidTokenErr)
+	}
+
+	var ts model.TokenSession
+	r := mysql.DB.Model(&model.TokenSession{}).Where("uuid=? AND mobile=? AND refresh_token=?", req.Uuid, req.Mobile, req.RefreshToken).First(&ts)
+	if r.RowsAffected < 1 {
+		return nil, errors.New(e.InvalidRefreshTokenErr)
+	}
+
+	JWTToken, payload, err := jwtMaker.CreateToken(req.Mobile, time.Duration(settings.UserServiceConf.TokenConf.ExpireTime))
+	if err != nil {
+		return nil, errors.New(e.InternalBusy)
+	}
+
+	var res pb.RefreshRes
+	res = pb.RefreshRes{
+		Uuid:      payload.ID.String(),
+		Mobile:    payload.Mobile,
+		Token:     JWTToken,
+		Issuer:    payload.Issuer,
+		IssuedAt:  payload.IssuedAt.Unix(),
+		ExpiredAt: payload.ExpireAt.Unix(),
 	}
 
 	return &res, nil

@@ -17,7 +17,7 @@ func TestJWTMaker(t *testing.T) {
 	require.NoError(t, err)
 
 	mobile := util.RandomMobile()
-	duration := time.Minute
+	duration := time.Duration(settings.UserServiceConf.TokenConf.ExpireTime) * time.Second
 
 	issuedAt := time.Now()
 	expiredAt := issuedAt.Add(duration)

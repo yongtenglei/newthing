@@ -9,9 +9,10 @@ const (
 	PasswordErr       = "密码错误"
 	InternalBusy      = "内部错误"
 
-	InvalidTokenErr = "无效TOKEN"
-	ExpiredTokenErr = "过期的Token"
-	TokenMethodErr  = "非HMAC方法"
+	InvalidTokenErr        = "无效TOKEN"
+	InvalidRefreshTokenErr = "无效刷新TOKEN"
+	ExpiredTokenErr        = "过期的Token"
+	TokenMethodErr         = "非HMAC方法"
 
 	TokenSessionDoesNotFound = "tokenSession不存在"
 )

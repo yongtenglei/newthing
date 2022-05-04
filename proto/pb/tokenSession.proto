@@ -10,6 +10,7 @@ service TokenSessionService{
 
   rpc CreateTokenSession(CreateReq) returns (CreateRes);
   rpc GetTokenSession(GetReq) returns (GetRes);
+  rpc RefreshToken(RefreshReq) returns (RefreshRes);
 
 }
 
@@ -43,4 +44,19 @@ message GetRes {
   string clientIP=6;
   int64 issuedAt=7;
   int64 expiredAt=8;
+}
+
+message RefreshReq {
+  string uuid=1;
+  string mobile=2;
+  string refreshToken=3;
+}
+
+message RefreshRes {
+  string uuid=1;
+  string mobile=2;
+  string Token=3;
+  string issuer=4;
+  int64 issuedAt=5;
+  int64 expiredAt=6;
 }

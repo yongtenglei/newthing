@@ -24,6 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 type TokenSessionServiceClient interface {
 	CreateTokenSession(ctx context.Context, in *CreateReq, opts ...grpc.CallOption) (*CreateRes, error)
 	GetTokenSession(ctx context.Context, in *GetReq, opts ...grpc.CallOption) (*GetRes, error)
+	RefreshToken(ctx context.Context, in *RefreshReq, opts ...grpc.CallOption) (*RefreshRes, error)
 }
 
 type tokenSessionServiceClient struct {
@@ -52,12 +53,22 @@ func (c *tokenSessionServiceClient) GetTokenSession(ctx context.Context, in *Get
 	return out, nil
 }
 
+func (c *tokenSessionServiceClient) RefreshToken(ctx context.Context, in *RefreshReq, opts ...grpc.CallOption) (*RefreshRes, error) {
+	out := new(RefreshRes)
+	err := c.cc.Invoke(ctx, "/pb.TokenSessionService/RefreshToken", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TokenSessionServiceServer is the server API for TokenSessionService service.
 // All implementations must embed UnimplementedTokenSessionServiceServer
 // for forward compatibility
 type TokenSessionServiceServer interface {
 	CreateTokenSession(context.Context, *CreateReq) (*CreateRes, error)
 	GetTokenSession(context.Context, *GetReq) (*GetRes, error)
+	RefreshToken(context.Context, *RefreshReq) (*RefreshRes, error)
 	mustEmbedUnimplementedTokenSessionServiceServer()
 }
 
@@ -70,6 +81,9 @@ func (UnimplementedTokenSessionServiceServer) CreateTokenSession(context.Context
 }
 func (UnimplementedTokenSessionServiceServer) GetTokenSession(context.Context, *GetReq) (*GetRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTokenSession not implemented")
+}
+func (UnimplementedTokenSessionServiceServer) RefreshToken(context.Context, *RefreshReq) (*RefreshRes, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RefreshToken not implemented")
 }
 func (UnimplementedTokenSessionServiceServer) mustEmbedUnimplementedTokenSessionServiceServer() {}
 
@@ -120,6 +134,24 @@ func _TokenSessionService_GetTokenSession_Handler(srv interface{}, ctx context.C
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TokenSessionService_RefreshToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RefreshReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TokenSessionServiceServer).RefreshToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.TokenSessionService/RefreshToken",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TokenSessionServiceServer).RefreshToken(ctx, req.(*RefreshReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TokenSessionService_ServiceDesc is the grpc.ServiceDesc for TokenSessionService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -134,6 +166,10 @@ var TokenSessionService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetTokenSession",
 			Handler:    _TokenSessionService_GetTokenSession_Handler,
+		},
+		{
+			MethodName: "RefreshToken",
+			Handler:    _TokenSessionService_RefreshToken_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
