@@ -32,7 +32,6 @@ func TestUserServiceServer_Register(t *testing.T) {
 
 		assert.Empty(t, err)
 		assert.Equal(t, fmt.Sprintf("1580000000%d", i), res.Mobile)
-		assert.Equal(t, fmt.Sprintf("1580000000%d", i), res.Password)
 		assert.Equal(t, fmt.Sprintf("%d", i), res.Name)
 		assert.Equal(t, int32(i%2), res.Gender)
 		assert.Equal(t, fmt.Sprintf("1580000000%d", i), res.Mail)

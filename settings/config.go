@@ -48,10 +48,11 @@ type MySQLConfig struct {
 }
 
 type TokenConfig struct {
-	MinSignKeySize int    `json:"minKeySize,required"`
-	Issuer         string `json:"issuer,required"`
-	SignKey        string `json:"signKey,required"`
-	ExpireTime     int64  `json:"expireTime"`
+	MinSignKeySize         int    `json:"minKeySize,required"`
+	Issuer                 string `json:"issuer,required"`
+	SignKey                string `json:"signKey,required"`
+	ExpireTime             int64  `json:"expireTime"`
+	RefreshTokenExpireTime int64  `json:"refreshTokenExpireTime"`
 }
 
 type ScryptConfig struct {

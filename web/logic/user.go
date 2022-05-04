@@ -104,8 +104,24 @@ type LoginReq struct {
 }
 
 type LoginRes struct {
-	Ok    int    `json:"ok"`
-	Token string `json:"token"`
+	Ok           int
+	Mobile       string
+	Token        string
+	Issuer       string
+	IssueAt      int64
+	ExpiredAt    int64
+	TokenSession RefreshTokenInfo
+}
+
+type RefreshTokenInfo struct {
+	Uuid         string
+	Mobile       string
+	RefreshToken string
+	Issuer       string
+	UserAgent    string
+	ClientIP     string
+	IssuedAt     int64
+	ExpiredAt    int64
 }
 
 func LoginHandler(c *gin.Context) {
@@ -119,7 +135,10 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 
-	r, err := UserServiceClient.Login(context.Background(), &pb.LoginReq{
+	ctx := context.WithValue(context.Background(), "UserAgent", c.Request.UserAgent())
+	ctx = context.WithValue(ctx, "ClientIP", c.ClientIP())
+
+	r, err := UserServiceClient.Login(ctx, &pb.LoginReq{
 		Mobile:   req.Mobile,
 		Password: req.Password,
 	})
@@ -134,8 +153,24 @@ func LoginHandler(c *gin.Context) {
 	}
 
 	var res LoginRes
-	res.Ok = int(r.Ok)
-	res.Token = r.Token
+	res = LoginRes{
+		Ok:        int(r.Ok),
+		Mobile:    r.Mobile,
+		Token:     r.Token,
+		Issuer:    r.Issuer,
+		IssueAt:   r.IssueAt,
+		ExpiredAt: r.ExpiredAt,
+		TokenSession: RefreshTokenInfo{
+			Uuid:         r.TokenSession.Uuid,
+			Mobile:       r.TokenSession.Mobile,
+			RefreshToken: r.TokenSession.RefreshToken,
+			Issuer:       r.TokenSession.Issuer,
+			UserAgent:    r.TokenSession.UserAgent,
+			ClientIP:     r.TokenSession.ClientIP,
+			IssuedAt:     r.TokenSession.IssuedAt,
+			ExpiredAt:    r.TokenSession.ExpiredAt,
+		},
+	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"code": e.OK,

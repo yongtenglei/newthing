@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+//import "google/protobuf/empty.proto";
+// 文件生成在那个包下
+package pb;
+//  proto文件的别名
+option go_package = "./pb";
+
+service TokenSessionService{
+
+  rpc CreateTokenSession(CreateReq) returns (CreateRes);
+  rpc GetTokenSession(GetReq) returns (GetRes);
+
+}
+
+message CreateReq {
+  string uuid=1;
+  string mobile=2;
+  string refreshToken=3;
+  string issuer=4;
+  string userAgent=5;
+  string clientIP=6;
+  int64 issuedAt=7;
+  int64 expiredAt=8;
+
+}
+
+message CreateRes {
+  int32 ok=1;
+}
+
+message GetReq {
+  string uuid=1;
+  string mobile=2;
+}
+
+message GetRes {
+  string uuid=1;
+  string mobile=2;
+  string refreshToken=3;
+  string issuer=4;
+  string userAgent=5;
+  string clientIP=6;
+  int64 issuedAt=7;
+  int64 expiredAt=8;
+}

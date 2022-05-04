@@ -12,4 +12,6 @@ const (
 	InvalidTokenErr = "无效TOKEN"
 	ExpiredTokenErr = "过期的Token"
 	TokenMethodErr  = "非HMAC方法"
+
+	TokenSessionDoesNotFound = "tokenSession不存在"
 )

@@ -45,7 +45,23 @@ message LoginReq {
 
 message LoginRes {
   int32 ok = 1;
-  string token = 2;
+  string mobile=2;
+  string token=3;
+  string issuer=4;
+  int64 issueAt=7;
+  int64 expiredAt=8;
+  RefreshTokenInfo tokenSession=9;
+}
+
+message RefreshTokenInfo {
+  string uuid=1;
+  string mobile=2;
+  string refreshToken=3;
+  string issuer=4;
+  string userAgent=5;
+  string clientIP=6;
+  int64 issuedAt=7;
+  int64 expiredAt=8;
 }
 
 message InfoReq {

@@ -60,22 +60,60 @@ func (us UserServiceServer) Login(ctx context.Context, req *pb.LoginReq) (*pb.Lo
 		return nil, errors.New(e.PasswordErr)
 	}
 
-	var res pb.LoginRes
-	res.Ok = 1
-
 	// if you want to use paseto instead of jwt, substitute JWTMaker to PasetoMaker instead.
 	jwtMaker, err := tokenx.NewJWTMaker(settings.UserServiceConf.TokenConf.SignKey)
 	if err != nil {
 		zap.S().Errorw("Register NewJWTMaker failed", "err", err.Error())
 		return nil, errors.New(e.InternalBusy)
 	}
-	token, err := jwtMaker.CreateToken(req.Mobile, time.Duration(settings.UserServiceConf.TokenConf.ExpireTime))
+	token, payload, err := jwtMaker.CreateToken(req.Mobile, time.Duration(settings.UserServiceConf.TokenConf.ExpireTime))
 	if err != nil {
-		zap.S().Errorw("Register CreateUserClaims failed", "err", err.Error())
+		zap.S().Errorw("Register CreateToken failed", "err", err.Error())
 		return nil, errors.New(e.InternalBusy)
 	}
 
-	res.Token = token
+	// Create a token session for refresh token
+	refreshToken, refreshPayload, err := jwtMaker.CreateToken(req.Mobile, time.Duration(settings.UserServiceConf.TokenConf.RefreshTokenExpireTime))
+	if err != nil {
+		zap.S().Errorw("Register CreateRefreshToken failed", "err", err.Error())
+		return nil, errors.New(e.InternalBusy)
+	}
+
+	tokenSessionServer := TokenSessionServiceServer{}
+	session, err := tokenSessionServer.CreateTokenSession(ctx, &pb.CreateReq{
+		Uuid:         refreshPayload.ID.String(),
+		Mobile:       refreshPayload.Mobile,
+		RefreshToken: refreshToken,
+		Issuer:       refreshPayload.Issuer,
+		UserAgent:    ctx.Value("UserAgent").(string),
+		ClientIP:     ctx.Value("ClientIP").(string),
+		IssuedAt:     refreshPayload.IssuedAt.Unix(),
+		ExpiredAt:    refreshPayload.ExpireAt.Unix(),
+	})
+	if err != nil {
+		zap.S().Errorw("Register tokenSessionServer.CreateTokenSession failed", "err", err.Error())
+		return nil, errors.New(e.InternalBusy)
+	}
+
+	var res pb.LoginRes
+	res = pb.LoginRes{
+		Ok:        session.Ok,
+		Mobile:    payload.Mobile,
+		Token:     token,
+		Issuer:    payload.Issuer,
+		IssueAt:   payload.IssuedAt.Unix(),
+		ExpiredAt: payload.ExpireAt.Unix(),
+		TokenSession: &pb.RefreshTokenInfo{
+			Uuid:         refreshPayload.ID.String(),
+			Mobile:       refreshPayload.Mobile,
+			RefreshToken: refreshToken,
+			Issuer:       refreshPayload.Issuer,
+			UserAgent:    ctx.Value("UserAgent").(string),
+			ClientIP:     ctx.Value("ClientIP").(string),
+			IssuedAt:     refreshPayload.IssuedAt.Unix(),
+			ExpiredAt:    refreshPayload.ExpireAt.Unix(),
+		},
+	}
 
 	return &res, nil
 }

@@ -27,7 +27,7 @@ func Init() {
 		panic(err)
 	}
 
-	err = DB.AutoMigrate(&model.User{})
+	err = DB.AutoMigrate(&model.User{}, &model.TokenSession{})
 	if err != nil {
 		zap.S().Errorw("AutoMigrate model failed", "err", err.Error())
 		panic(err)
