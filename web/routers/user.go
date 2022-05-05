@@ -19,6 +19,8 @@ func SetUp() *gin.Engine {
 	// login
 	router.POST("/login", logic.LoginHandler)
 
+	router.POST("/refreshToken", logic.RefreshTokenHandler)
+
 	v1Group := router.Group("/v1/api/user", middlewares.JWTAuth())
 	{
 		// info

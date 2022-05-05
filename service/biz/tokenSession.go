@@ -3,16 +3,18 @@ package biz
 import (
 	"context"
 	"errors"
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/yongtenglei/newThing/dao/mysql"
 	"github.com/yongtenglei/newThing/model"
 	"github.com/yongtenglei/newThing/pkg/e"
 	"github.com/yongtenglei/newThing/pkg/tokenx"
+	"github.com/yongtenglei/newThing/pkg/util"
 	"github.com/yongtenglei/newThing/proto/pb"
 	"github.com/yongtenglei/newThing/settings"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
-	"time"
 )
 
 type TokenSessionServiceServer struct {
@@ -90,9 +92,21 @@ func (t TokenSessionServiceServer) RefreshToken(ctx context.Context, req *pb.Ref
 		return nil, errors.New(e.InvalidRefreshTokenErr)
 	}
 
-	JWTToken, payload, err := jwtMaker.CreateToken(req.Mobile, time.Duration(settings.UserServiceConf.TokenConf.ExpireTime))
+	JWTToken, payload, err := jwtMaker.CreateToken(req.Mobile, time.Duration(settings.UserServiceConf.TokenConf.ExpireTime)*time.Second)
 	if err != nil {
 		return nil, errors.New(e.InternalBusy)
+	}
+
+	var userAgent string
+	var clientIP string
+	var ok bool
+	userAgent, ok = util.FromContextForStr(ctx, "UserAgent")
+	if !ok {
+		userAgent = ""
+	}
+	clientIP, ok = util.FromContextForStr(ctx, "ClientIP")
+	if !ok {
+		clientIP = ""
 	}
 
 	var res pb.RefreshRes
@@ -101,6 +115,8 @@ func (t TokenSessionServiceServer) RefreshToken(ctx context.Context, req *pb.Ref
 		Mobile:    payload.Mobile,
 		Token:     JWTToken,
 		Issuer:    payload.Issuer,
+		UserAgent: userAgent,
+		ClientIP:  clientIP,
 		IssuedAt:  payload.IssuedAt.Unix(),
 		ExpiredAt: payload.ExpireAt.Unix(),
 	}

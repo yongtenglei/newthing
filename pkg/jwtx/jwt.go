@@ -2,11 +2,12 @@ package jwtx
 
 import (
 	"errors"
+	"time"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/yongtenglei/newThing/pkg/e"
 	"github.com/yongtenglei/newThing/settings"
 	"go.uber.org/zap"
-	"time"
 )
 
 type UserClaims struct {
@@ -19,7 +20,7 @@ func CreateUserClaims(mobile string) (string, error) {
 	claims := UserClaims{
 		mobile,
 		jwt.StandardClaims{
-			ExpiresAt: time.Now().Unix() + settings.UserServiceConf.TokenConf.ExpireTime,
+			ExpiresAt: time.Now().Add(time.Duration(settings.UserServiceConf.TokenConf.ExpireTime) * time.Second).Unix(),
 			Issuer:    settings.UserServiceConf.TokenConf.Issuer,
 		},
 	}
@@ -80,7 +81,7 @@ func RefreshToken(token string) (string, error) {
 
 	if tokenClaims != nil {
 		if claims, ok := tokenClaims.Claims.(*UserClaims); ok && tokenClaims.Valid {
-			claims.StandardClaims.ExpiresAt = time.Now().Add(time.Duration(settings.UserServiceConf.TokenConf.ExpireTime)).Unix()
+			claims.StandardClaims.ExpiresAt = time.Now().Add(time.Duration(settings.UserServiceConf.TokenConf.ExpireTime) * time.Second).Unix()
 			return CreateUserClaims(claims.Mobile)
 		}
 	}

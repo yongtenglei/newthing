@@ -3,15 +3,17 @@ package biz
 import (
 	"context"
 	"errors"
+	"time"
+
 	"github.com/yongtenglei/newThing/dao/mysql"
 	"github.com/yongtenglei/newThing/model"
 	"github.com/yongtenglei/newThing/pkg/e"
 	"github.com/yongtenglei/newThing/pkg/scryptx"
 	"github.com/yongtenglei/newThing/pkg/tokenx"
+	"github.com/yongtenglei/newThing/pkg/util"
 	"github.com/yongtenglei/newThing/proto/pb"
 	"github.com/yongtenglei/newThing/settings"
 	"go.uber.org/zap"
-	"time"
 )
 
 type UserServiceServer struct {
@@ -66,17 +68,29 @@ func (us UserServiceServer) Login(ctx context.Context, req *pb.LoginReq) (*pb.Lo
 		zap.S().Errorw("Register NewJWTMaker failed", "err", err.Error())
 		return nil, errors.New(e.InternalBusy)
 	}
-	token, payload, err := jwtMaker.CreateToken(req.Mobile, time.Duration(settings.UserServiceConf.TokenConf.ExpireTime))
+	token, payload, err := jwtMaker.CreateToken(req.Mobile, time.Duration(settings.UserServiceConf.TokenConf.ExpireTime)*time.Second)
 	if err != nil {
 		zap.S().Errorw("Register CreateToken failed", "err", err.Error())
 		return nil, errors.New(e.InternalBusy)
 	}
 
 	// Create a token session for refresh token
-	refreshToken, refreshPayload, err := jwtMaker.CreateToken(req.Mobile, time.Duration(settings.UserServiceConf.TokenConf.RefreshTokenExpireTime))
+	refreshToken, refreshPayload, err := jwtMaker.CreateToken(req.Mobile, time.Duration(settings.UserServiceConf.TokenConf.RefreshTokenExpireTime)*time.Second)
 	if err != nil {
 		zap.S().Errorw("Register CreateRefreshToken failed", "err", err.Error())
 		return nil, errors.New(e.InternalBusy)
+	}
+
+	var userAgent string
+	var clientIP string
+	var ok bool
+	userAgent, ok = util.FromContextForStr(ctx, "UserAgent")
+	if !ok {
+		userAgent = ""
+	}
+	clientIP, ok = util.FromContextForStr(ctx, "ClientIP")
+	if !ok {
+		clientIP = ""
 	}
 
 	tokenSessionServer := TokenSessionServiceServer{}
@@ -85,8 +99,8 @@ func (us UserServiceServer) Login(ctx context.Context, req *pb.LoginReq) (*pb.Lo
 		Mobile:       refreshPayload.Mobile,
 		RefreshToken: refreshToken,
 		Issuer:       refreshPayload.Issuer,
-		UserAgent:    ctx.Value("UserAgent").(string),
-		ClientIP:     ctx.Value("ClientIP").(string),
+		UserAgent:    userAgent,
+		ClientIP:     clientIP,
 		IssuedAt:     refreshPayload.IssuedAt.Unix(),
 		ExpiredAt:    refreshPayload.ExpireAt.Unix(),
 	})
@@ -108,8 +122,8 @@ func (us UserServiceServer) Login(ctx context.Context, req *pb.LoginReq) (*pb.Lo
 			Mobile:       refreshPayload.Mobile,
 			RefreshToken: refreshToken,
 			Issuer:       refreshPayload.Issuer,
-			UserAgent:    ctx.Value("UserAgent").(string),
-			ClientIP:     ctx.Value("ClientIP").(string),
+			UserAgent:    userAgent,
+			ClientIP:     clientIP,
 			IssuedAt:     refreshPayload.IssuedAt.Unix(),
 			ExpiredAt:    refreshPayload.ExpireAt.Unix(),
 		},

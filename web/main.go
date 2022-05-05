@@ -44,7 +44,8 @@ func init() {
 		panic(err)
 	}
 
-	logic.InitClient()
+	logic.InitUserServiceClient()
+	logic.InitRefreshTokenServiceClient()
 }
 
 func main() {

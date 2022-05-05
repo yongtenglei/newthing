@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/mbobakov/grpc-consul-resolver" // It's important
 	"github.com/yongtenglei/newThing/pkg/e"
+	"github.com/yongtenglei/newThing/pkg/util"
 	"github.com/yongtenglei/newThing/proto/pb"
 	"github.com/yongtenglei/newThing/settings"
 	"go.uber.org/zap"
@@ -15,7 +16,7 @@ import (
 
 var UserServiceClient pb.UserServiceClient
 
-func InitClient() {
+func InitUserServiceClient() {
 	//addr := fmt.Sprintf("%s:%d",
 	//	settings.UserServiceConf.UserWebServerConf.Host,
 	//	settings.UserServiceConf.UserWebServerConf.Port)
@@ -135,8 +136,10 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 
-	ctx := context.WithValue(context.Background(), "UserAgent", c.Request.UserAgent())
-	ctx = context.WithValue(ctx, "ClientIP", c.ClientIP())
+	ctx := util.NewStrContext(context.Background(), "UserAgent", c.Request.UserAgent())
+	ctx = util.NewStrContext(ctx, "ClientIP", c.ClientIP())
+
+	zap.S().Info(c.Request.UserAgent())
 
 	r, err := UserServiceClient.Login(ctx, &pb.LoginReq{
 		Mobile:   req.Mobile,

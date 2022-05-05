@@ -45,6 +45,7 @@ func main() {
 	}
 	server := grpc.NewServer()
 	pb.RegisterUserServiceServer(server, &biz.UserServiceServer{})
+	pb.RegisterTokenSessionServiceServer(server, &biz.TokenSessionServiceServer{})
 
 	grpc_health_v1.RegisterHealthServer(server, health.NewServer())
 
